@@ -469,7 +469,9 @@ def train_advanced_model():
 def run_api_server():
     """Run Flask API server in background for testing"""
     app = create_model_api()
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Safer for local testing
+    app.run(host='127.0.0.1', port=5000, debug=False)
+
 
 if __name__ == "__main__":
     try:
