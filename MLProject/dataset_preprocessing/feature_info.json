@@ -1,0 +1,26 @@
+{
+  "feature_columns": [
+    "Time_spent_Alone",
+    "Social_event_attendance",
+    "Going_outside",
+    "Friends_circle_size",
+    "Post_frequency",
+    "Stage_fear_encoded",
+    "Drained_after_socializing_encoded"
+  ],
+  "numeric_features": [
+    "Time_spent_Alone",
+    "Social_event_attendance",
+    "Going_outside",
+    "Friends_circle_size",
+    "Post_frequency"
+  ],
+  "categorical_features": [
+    "Stage_fear",
+    "Drained_after_socializing"
+  ],
+  "target_classes": [
+    "Extrovert",
+    "Introvert"
+  ]
+}

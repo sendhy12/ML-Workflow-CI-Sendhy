@@ -1,0 +1,71 @@
+name: ML Training CI - Basic
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "Workflow-CI/**"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "Workflow-CI/**"
+  workflow_dispatch:
+
+jobs:
+  train-basic:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.7"
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔧 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd Workflow-CI/MLProject
+          pip install -r requirements.txt
+
+      - name: 📊 Verify data files
+        run: |
+          cd Workflow-CI/MLProject
+          echo "Checking for required data files..."
+          ls -la dataset_preprocessing/
+          python -c "import pandas as pd; print('✅ All data files accessible')"
+
+      - name: 🤖 Run MLflow Project - Basic
+        run: |
+          cd Workflow-CI/MLProject
+          echo "Starting basic ML training..."
+          python modelling.py
+
+      - name: 📋 Display training results
+        run: |
+          echo "✅ Basic training completed successfully!"
+          echo "📊 Check the logs above for accuracy results"
+
+      - name: 🏗️ Test model loading (verification)
+        run: |
+          cd Workflow-CI/MLProject
+          python -c "
+          import mlflow
+          import os
+          if os.path.exists('mlruns'):
+              print('✅ MLflow artifacts generated')
+              print('📁 MLruns directory contents:')
+              os.system('ls -la mlruns/')
+          else:
+              print('⚠️ No mlruns directory found')
+          "

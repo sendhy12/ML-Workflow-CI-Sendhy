@@ -1,0 +1,13 @@
+name: ML_Training_Project_Basic
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    command: "python modelling.py"
+  
+  skilled:
+    command: "python modelling_skilled.py"
+    
+  advanced:
+    command: "python modelling_advanced.py"
