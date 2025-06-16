@@ -22,7 +22,7 @@ safety==2.3.5
 
 # Deployment and containerization
 gunicorn==21.2.0
-docker==7.0.0
+docker==6.1.3  # ✅ now compatible with mlflow 2.9.2
 
 # Utility libraries
 joblib==1.3.2
