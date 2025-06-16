@@ -16,56 +16,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Set up job
+        run: |
+          echo "Starting ML Training CI - Basic workflow"
+          echo "Workflow started at: $(date)"
+
+      - name: Run actions/checkout@v3
         uses: actions/checkout@v4
 
-      - name: 🐍 Set up Python 3.12
+      - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
 
-      - name: 📦 Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: 🔧 Install dependencies
+      - name: Check Env
         run: |
+          echo "Checking environment..."
+          python --version
+          pip --version
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
           python -m pip install --upgrade pip
           cd MLProject
           pip install -r requirements.txt
+          echo "Dependencies installed successfully"
 
-      - name: 📊 Verify data files
+      - name: Run mlflow project
         run: |
           cd MLProject
-          echo "Checking for required data files..."
-          ls -la dataset_preprocessing/
-          python -c "import pandas as pd; print('✅ All data files accessible')"
-
-      - name: 🤖 Run MLflow Project - Basic
-        run: |
-          cd MLProject
-          echo "Starting basic ML training..."
+          echo "Starting MLflow project..."
+          echo "Running model training..."
           python modelling.py
+          echo "MLflow project completed"
 
-      - name: 📋 Display training results
-        run: |
-          echo "✅ Basic training completed successfully!"
-          echo "📊 Check the logs above for accuracy results"
-
-      - name: 🏗️ Test model loading (verification)
+      - name: Get latest MLflow run id
         run: |
           cd MLProject
+          echo "Getting latest MLflow run information..."
           python -c "
           import mlflow
           import os
           if os.path.exists('mlruns'):
-              print('✅ MLflow artifacts generated')
-              print('📁 MLruns directory contents:')
-              os.system('ls -la mlruns/')
+              print('MLflow artifacts generated')
+              print('MLruns directory contents:')
+              os.system('find mlruns -name \"*.json\" | head -5')
+              
+              # Try to get the latest run ID
+              try:
+                  experiments = mlflow.search_experiments()
+                  if experiments:
+                      runs = mlflow.search_runs(experiment_ids=[experiments[0].experiment_id])
+                      if not runs.empty:
+                          latest_run_id = runs.iloc[0]['run_id']
+                          print(f'Latest Run ID: {latest_run_id}')
+                      else:
+                          print('No runs found')
+                  else:
+                      print('No experiments found')
+              except Exception as e:
+                  print(f'Could not retrieve run info: {e}')
           else:
-              print('⚠️ No mlruns directory found')
+              print('No mlruns directory found')
           "
+          echo "Workflow completed successfully!"
