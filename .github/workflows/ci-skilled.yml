@@ -1,0 +1,128 @@
+name: ML Training CI - Skilled (with Artifacts)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "Workflow-CI/**"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "Workflow-CI/**"
+  workflow_dispatch:
+
+jobs:
+  train-skilled:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.7"
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔧 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd Workflow-CI/MLProject
+          pip install -r requirements.txt
+
+      - name: 📊 Verify data files
+        run: |
+          cd Workflow-CI/MLProject
+          echo "Checking for required data files..."
+          ls -la dataset_preprocessing/
+          echo "Data files verification completed ✅"
+
+      - name: 🤖 Run MLflow Project - Skilled
+        run: |
+          cd Workflow-CI/MLProject
+          echo "Starting skilled ML training with comprehensive logging..."
+          python modelling_skilled.py
+
+      - name: 📁 Prepare artifacts for upload
+        run: |
+          cd Workflow-CI/MLProject
+          echo "Preparing MLflow artifacts..."
+
+          # Create artifacts directory
+          mkdir -p ../artifacts
+
+          # Copy MLflow runs if they exist
+          if [ -d "mlruns" ]; then
+            echo "📦 Copying MLflow artifacts..."
+            cp -r mlruns ../artifacts/
+            echo "✅ MLflow artifacts copied"
+          else
+            echo "⚠️ No mlruns directory found"
+          fi
+
+          # List contents for verification
+          echo "📋 Artifacts directory contents:"
+          ls -la ../artifacts/
+
+      - name: 📤 Upload MLflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-skilled-artifacts-${{ github.run_number }}
+          path: Workflow-CI/artifacts/
+          retention-days: 30
+
+      - name: 📊 Generate training summary
+        run: |
+          cd Workflow-CI/MLProject
+          echo "=== SKILLED TRAINING SUMMARY ===" > ../training_summary.md
+          echo "**Run Number:** ${{ github.run_number }}" >> ../training_summary.md
+          echo "**Timestamp:** $(date)" >> ../training_summary.md
+          echo "**Commit:** ${{ github.sha }}" >> ../training_summary.md
+          echo "" >> ../training_summary.md
+          echo "### Artifacts Generated:" >> ../training_summary.md
+          echo "- MLflow experiment data" >> ../training_summary.md
+          echo "- Confusion matrix plots" >> ../training_summary.md
+          echo "- Feature importance charts" >> ../training_summary.md
+          echo "- Performance metrics visualization" >> ../training_summary.md
+          echo "- Detailed JSON results" >> ../training_summary.md
+
+          if [ -d "mlruns" ]; then
+            echo "" >> ../training_summary.md
+            echo "### MLflow Run Details:" >> ../training_summary.md
+            find mlruns -name "*.json" | head -5 | while read file; do
+              echo "- $(basename $file)" >> ../training_summary.md
+            done
+          fi
+
+      - name: 📤 Upload training summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-summary-${{ github.run_number }}
+          path: Workflow-CI/training_summary.md
+
+      - name: 🔄 Commit artifacts to repository (optional)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cd Workflow-CI/MLProject
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action CI"
+
+          # Add mlruns if exists
+          if [ -d "mlruns" ]; then
+            git add mlruns/ || true
+            git commit -m "🤖 Add MLflow artifacts from skilled CI run #${{ github.run_number }}" || echo "No changes to commit"
+          fi
+
+      - name: ✅ Skilled training completed
+        run: |
+          echo "🎉 Skilled ML training with artifacts completed successfully!"
+          echo "📊 Artifacts uploaded and available for download"
+          echo "🔗 Check the Actions tab for downloadable artifacts"
