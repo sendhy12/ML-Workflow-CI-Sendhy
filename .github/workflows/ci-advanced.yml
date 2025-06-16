@@ -57,14 +57,14 @@ jobs:
         run: |
           # Simulate Google Drive upload
           echo "Uploading artifacts to Google Drive..."
-          echo "✅ Artifacts uploaded successfully"
+          echo "Artifacts uploaded successfully"
 
       - name: Build Docker Model
         run: |
           cd MLProject
           echo "Building Docker image for ML model..."
           docker build -t ml-personality-model:latest .
-          echo "✅ Docker image built successfully"
+          echo "Docker image built successfully"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -76,34 +76,34 @@ jobs:
       - name: Tag Docker Image
         run: |
           docker tag ml-personality-model:latest ${{ github.actor }}/ml-personality-model:latest
-          echo "✅ Docker image tagged successfully"
+          echo "Docker image tagged successfully"
 
       - name: Push Docker Image
         run: |
           echo "Pushing Docker image to registry..."
           # docker push ${{ github.actor }}/ml-personality-model:latest
-          echo "✅ Docker image push simulated successfully"
+          echo "Docker image push simulated successfully"
         continue-on-error: true
 
       - name: Post Log in to Docker Hub
         run: |
           echo "Docker Hub operations completed"
-          echo "✅ Post-login cleanup successful"
+          echo "Post-login cleanup successful"
 
       - name: Post Set up Python 3.12.7
         run: |
           echo "Python environment cleanup completed"
-          echo "✅ Python setup post-processing successful"
+          echo "Python setup post-processing successful"
 
       - name: Post Run actions/checkout@v3
         run: |
           echo "Repository checkout post-processing completed"
-          echo "✅ Checkout post-processing successful"
+          echo "Checkout post-processing successful"
 
       - name: Complete job
         run: |
-          echo "🎉 All workflow steps completed successfully!"
-          echo "📊 MLflow experiment tracking: ✅"
-          echo "🐳 Docker containerization: ✅"
-          echo "☁️  Artifact storage: ✅"
-          echo "🚀 CI/CD pipeline: ✅"
+          echo "All workflow steps completed successfully!"
+          echo "MLflow experiment tracking: ✅"
+          echo "Docker containerization: ✅"
+          echo "Artifact storage: ✅"
+          echo "CI/CD pipeline: ✅"
