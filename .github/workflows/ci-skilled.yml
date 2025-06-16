@@ -35,25 +35,25 @@ jobs:
       - name: 🔧 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          cd Workflow-CI/MLProject
+          cd MLProject
           pip install -r requirements.txt
 
       - name: 📊 Verify data files
         run: |
-          cd Workflow-CI/MLProject
+          cd MLProject
           echo "Checking for required data files..."
           ls -la dataset_preprocessing/
           echo "Data files verification completed ✅"
 
       - name: 🤖 Run MLflow Project - Skilled
         run: |
-          cd Workflow-CI/MLProject
+          cd MLProject
           echo "Starting skilled ML training with comprehensive logging..."
           python modelling_skilled.py
 
       - name: 📁 Prepare artifacts for upload
         run: |
-          cd Workflow-CI/MLProject
+          cd MLProject
           echo "Preparing MLflow artifacts..."
 
           # Create artifacts directory
@@ -81,7 +81,7 @@ jobs:
 
       - name: 📊 Generate training summary
         run: |
-          cd Workflow-CI/MLProject
+          cd MLProject
           echo "=== SKILLED TRAINING SUMMARY ===" > ../training_summary.md
           echo "**Run Number:** ${{ github.run_number }}" >> ../training_summary.md
           echo "**Timestamp:** $(date)" >> ../training_summary.md
@@ -111,7 +111,7 @@ jobs:
       - name: 🔄 Commit artifacts to repository (optional)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          cd Workflow-CI/MLProject
+          cd MLProject
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action CI"
 
